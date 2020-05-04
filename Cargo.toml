@@ -1,0 +1,13 @@
+[package]
+name = "plier"
+version = "0.1.0"
+authors = ["shaolang <shaolang@ymail.com>"]
+edition = "2018"
+
+[lib]
+name = "plier"
+path = "src/plier/lib.rs"
+doctest = false
+
+[[bin]]
+name = "plier"
