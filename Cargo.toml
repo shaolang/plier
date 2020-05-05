@@ -11,3 +11,6 @@ doctest = false
 
 [[bin]]
 name = "plier"
+
+[dependencies]
+toml = "0.5.6"
