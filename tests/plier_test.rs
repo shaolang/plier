@@ -16,10 +16,11 @@ fn batch_filename_combines_executables_directory_with_given_filename() {
 
 #[test]
 fn add_spec_for_new_devkit() {
-    let actual = plier::add_spec_entry("", "java", vec!["bin".to_string()]);
-    let expected = Ok(indoc!(r#"[java]
-                                bins = ["bin"]
-                                "#).to_string());
+    let mut actual = plier::load_spec("").unwrap();
+    plier::add_spec_entry(&mut actual, "java", vec!["bin".to_string()]);
+    let expected = plier::load_spec(indoc!(r#"[java]
+                                              bins = ["bin"]
+                                              "#)).unwrap();
 
     assert_eq!(actual, expected);
 }
@@ -27,16 +28,17 @@ fn add_spec_for_new_devkit() {
 
 #[test]
 fn add_spec_when_others_exists() {
-    let actual = plier::add_spec_entry(
-        "[java]\nbins = [\"bin\"]\n",
+    let mut actual = plier::load_spec("[java]\nbins = [\"bin\"]\n").unwrap();
+    plier::add_spec_entry(
+        &mut actual,
         "python",
         vec![".".to_string(), "Scripts".to_string()]);
-    let expected = Ok(indoc!(r#"[java]
-                                bins = ["bin"]
+    let expected = plier::load_spec(indoc!(r#"[java]
+                                              bins = ["bin"]
 
-                                [python]
-                                bins = [".", "Scripts"]
-                                "#).to_string());
+                                              [python]
+                                              bins = [".", "Scripts"]
+                                              "#)).unwrap();
 
     assert_eq!(actual, expected);
 }
