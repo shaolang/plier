@@ -15,8 +15,8 @@ fn batch_filename_combines_executables_directory_with_given_filename() {
 
 
 #[test]
-fn create_spec_for_new_devkit() {
-    let actual = plier::create_spec("", "java", vec!["bin".to_string()]);
+fn add_spec_for_new_devkit() {
+    let actual = plier::add_spec_entry("", "java", vec!["bin".to_string()]);
     let expected = Ok(indoc!(r#"[java]
                                 bins = ["bin"]
                                 "#).to_string());
@@ -26,8 +26,8 @@ fn create_spec_for_new_devkit() {
 
 
 #[test]
-fn create_spec_when_others_exists() {
-    let actual = plier::create_spec(
+fn add_spec_when_others_exists() {
+    let actual = plier::add_spec_entry(
         "[java]\nbins = [\"bin\"]\n",
         "python",
         vec![".".to_string(), "Scripts".to_string()]);

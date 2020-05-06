@@ -20,7 +20,7 @@ pub fn batch_filename(exe_path: PathBuf, filename: &str) -> PathBuf {
 }
 
 
-pub fn create_spec(existing: &str, name: &str, bins: Vec<String>)
+pub fn add_spec_entry(existing: &str, name: &str, bins: Vec<String>)
         -> Result<String, toml::ser::Error> {
     let v: Value = toml::from_str(existing).unwrap();
     let mut m: Spec = v.try_into().unwrap();
