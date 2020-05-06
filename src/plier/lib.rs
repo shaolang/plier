@@ -4,9 +4,12 @@ use toml::{self, Value};
 use serde_derive::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize)]
-struct Spec {
+struct SpecEntry {
     bins: Vec<String>,
 }
+
+
+type Spec = BTreeMap<String, SpecEntry>;
 
 
 pub fn batch_filename(exe_path: PathBuf, filename: &str) -> PathBuf {
@@ -21,8 +24,8 @@ pub fn batch_filename(exe_path: PathBuf, filename: &str) -> PathBuf {
 pub fn create_spec(existing: &str, name: &str, bins: Vec<String>)
         -> Result<String, toml::ser::Error> {
     let v: Value = toml::from_str(existing).unwrap();
-    let mut m: BTreeMap<String, Spec> = v.try_into().unwrap();
-    m.insert(name.to_string(), Spec { bins });
+    let mut m: Spec = v.try_into().unwrap();
+    m.insert(name.to_string(), SpecEntry { bins });
 
     toml::to_string(&m)
 }
