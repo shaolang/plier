@@ -40,3 +40,42 @@ fn create_spec_when_others_exists() {
 
     assert_eq!(actual, expected);
 }
+
+
+#[test]
+fn load_spec_from_empty_string() {
+    let actual = plier::load_spec("").unwrap();
+
+    assert_eq!(actual, plier::Spec::new());
+}
+
+
+#[test]
+fn load_spec_from_valid_spec_string() {
+    let actual = plier::load_spec(indoc!(r#"[java]
+                                            bins = ["bin"]
+
+                                            [python]
+                                            bins = [".", "Scripts"]
+                                          "#)).unwrap();
+    let mut expected = plier::Spec::new();
+
+    expected.insert("java".to_string(), plier::SpecEntry {
+        bins: vec!["bin".to_string()]});
+    expected.insert("python".to_string(), plier::SpecEntry {
+        bins: vec![".".to_string(), "Scripts".to_string()]});
+
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn load_spec_from_invalid_spec_string() {
+    let actual = plier::load_spec(indoc!(r#"[hello]
+                                            bins = ['sbin']
+
+                                            [world]
+                                            greeting = ['what?']
+                                            "#));
+
+    assert!(actual.is_err());
+}
