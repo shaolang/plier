@@ -14,8 +14,8 @@
 * limitations under the License.
 */
 
-use std::env;
 use plier;
+use std::env;
 
 fn main() {
     let fname = plier::batch_filename(env::current_exe().unwrap(), "batch.bat");
