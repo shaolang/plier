@@ -26,6 +26,22 @@ pub struct SpecEntry {
 
 pub type Spec = BTreeMap<String, SpecEntry>;
 
+trait Speccable<T> {
+    fn add_entry(&mut self, name: &str, bins: Vec<String>);
+    fn load(s: &str) -> Result<T, toml::de::Error>;
+}
+
+impl Speccable<Spec> for Spec {
+    fn add_entry(&mut self, name: &str, bins: Vec<String>) {
+        self.insert(name.to_string(), SpecEntry { bins });
+    }
+
+    fn load(s: &str) -> Result<Spec, toml::de::Error> {
+        let v: Value = toml::from_str(s).unwrap();
+        v.try_into::<Spec>()
+    }
+}
+
 pub fn batch_filename(exe_path: PathBuf, filename: &str) -> PathBuf {
     let exe_str = exe_path.to_str().expect("Unable to get binary's path");
     let mut file = PathBuf::from(exe_str)
@@ -36,21 +52,9 @@ pub fn batch_filename(exe_path: PathBuf, filename: &str) -> PathBuf {
     file
 }
 
-pub fn add_spec_entry(spec: &mut Spec, name: &str, bins: Vec<String>) {
-    spec.insert(name.to_string(), SpecEntry { bins });
-}
-
-pub fn delete_spec_entry(spec: &mut Spec, name: &str) {
-    spec.remove(name);
-}
-
-pub fn load_spec(s: &str) -> Result<Spec, toml::de::Error> {
-    let v: Value = toml::from_str(s).unwrap();
-    v.try_into::<Spec>()
-}
-
 #[cfg(test)]
 mod tests {
+    use super::Speccable;
     use indoc::indoc;
     use std::path::PathBuf;
 
@@ -67,9 +71,9 @@ mod tests {
 
     #[test]
     fn add_spec_for_new_devkit() {
-        let mut actual = super::load_spec("").unwrap();
-        super::add_spec_entry(&mut actual, "java", vec!["bin".to_string()]);
-        let expected = super::load_spec(indoc!(
+        let mut actual = super::Spec::load("").unwrap();
+        actual.add_entry("java", vec!["bin".to_string()]);
+        let expected = super::Spec::load(indoc!(
             r#"[java]
                bins = ["bin"]
                "#
@@ -81,13 +85,9 @@ mod tests {
 
     #[test]
     fn add_spec_when_others_exists() {
-        let mut actual = super::load_spec("[java]\nbins = [\"bin\"]\n").unwrap();
-        super::add_spec_entry(
-            &mut actual,
-            "python",
-            vec![".".to_string(), "Scripts".to_string()],
-        );
-        let expected = super::load_spec(indoc!(
+        let mut actual = super::Spec::load("[java]\nbins = [\"bin\"]\n").unwrap();
+        actual.add_entry("python", vec![".".to_string(), "Scripts".to_string()]);
+        let expected = super::Spec::load(indoc!(
             r#"[java]
                bins = ["bin"]
 
@@ -102,41 +102,43 @@ mod tests {
 
     #[test]
     fn delete_non_existent_spec_entry() {
-        let mut actual = super::load_spec("[java]\nbins = ['bin']\n").unwrap();
+        let mut actual = super::Spec::load("[java]\nbins = ['bin']\n").unwrap();
         let expected = actual.clone();
-        super::delete_spec_entry(&mut actual, "python");
+        actual.remove("python");
 
         assert_eq!(actual, expected);
     }
 
     #[test]
     fn delete_known_entry() {
-        let mut actual = super::load_spec(indoc!(
-                r#"[java]
-                   bins = ['bin']
+        let mut actual = super::Spec::load(indoc!(
+            r#"[java]
+               bins = ['bin']
 
-                   [python]
-                   bins = ['.', 'Scripts']
-                   "#))
-            .unwrap();
+               [python]
+               bins = ['.', 'Scripts']
+               "#
+        ))
+        .unwrap();
 
-        super::delete_spec_entry(&mut actual, "python");
+        actual.remove("python");
 
-        assert_eq!(actual,
-                   super::load_spec("[java]\nbins = ['bin']\n").unwrap());
+        assert_eq!(
+            actual,
+            super::Spec::load("[java]\nbins = ['bin']\n").unwrap()
+        );
     }
-
 
     #[test]
     fn load_spec_from_empty_string() {
-        let actual = super::load_spec("").unwrap();
+        let actual = super::Spec::load("").unwrap();
 
         assert_eq!(actual, super::Spec::new());
     }
 
     #[test]
     fn load_spec_from_valid_spec_string() {
-        let actual = super::load_spec(indoc!(
+        let actual = super::Spec::load(indoc!(
             r#"[java]
                bins = ["bin"]
 
@@ -165,7 +167,7 @@ mod tests {
 
     #[test]
     fn load_spec_from_invalid_spec_string() {
-        let actual = super::load_spec(indoc!(
+        let actual = super::Spec::load(indoc!(
             r#"[hello]
                bins = ['sbin']
 
