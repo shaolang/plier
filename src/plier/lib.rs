@@ -19,7 +19,7 @@ use std::collections::BTreeMap;
 use std::path::PathBuf;
 use toml::{self, Value};
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct SpecEntry {
     pub bins: Vec<String>,
 }
@@ -38,6 +38,10 @@ pub fn batch_filename(exe_path: PathBuf, filename: &str) -> PathBuf {
 
 pub fn add_spec_entry(spec: &mut Spec, name: &str, bins: Vec<String>) {
     spec.insert(name.to_string(), SpecEntry { bins });
+}
+
+pub fn delete_spec_entry(spec: &mut Spec, name: &str) {
+    spec.remove(name);
 }
 
 pub fn load_spec(s: &str) -> Result<Spec, toml::de::Error> {
@@ -95,6 +99,33 @@ mod tests {
 
         assert_eq!(actual, expected);
     }
+
+    #[test]
+    fn delete_non_existent_spec_entry() {
+        let mut actual = super::load_spec("[java]\nbins = ['bin']\n").unwrap();
+        let expected = actual.clone();
+        super::delete_spec_entry(&mut actual, "python");
+
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn delete_known_entry() {
+        let mut actual = super::load_spec(indoc!(
+                r#"[java]
+                   bins = ['bin']
+
+                   [python]
+                   bins = ['.', 'Scripts']
+                   "#))
+            .unwrap();
+
+        super::delete_spec_entry(&mut actual, "python");
+
+        assert_eq!(actual,
+                   super::load_spec("[java]\nbins = ['bin']\n").unwrap());
+    }
+
 
     #[test]
     fn load_spec_from_empty_string() {
