@@ -62,9 +62,9 @@ mod tests {
     fn returns_plier_spec_with_missing_versions_when_versions_are_missing() {
         let spec = super::PlierSpec::load(indoc!(
             r#"[apps.java]
-                   home_name = "java_home"
-                   bins = ["bin"]
-                   "#
+               home_name = "java_home"
+               bins = ["bin"]
+               "#
         ));
 
         assert_eq!(spec.apps.get("java").unwrap().home_name, "java_home")
@@ -74,13 +74,13 @@ mod tests {
     fn returns_plier_spec_with_versions_when_they_exist() {
         let spec = super::PlierSpec::load(indoc!(
             r#"[apps.python]
-                   home_name = 'pythonhome'
-                   bins = ['.', 'Scripts']
+               home_name = 'pythonhome'
+               bins = ['.', 'Scripts']
 
-                   [[apps.python.versions]]
-                   version = "3.7.0"
-                   path = "/path/to/python/3.7.0"
-                   "#
+               [[apps.python.versions]]
+               version = "3.7.0"
+               path = "/path/to/python/3.7.0"
+               "#
         ));
         let versions = spec.apps.get("python").unwrap().versions.as_ref();
 
