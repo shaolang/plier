@@ -52,14 +52,14 @@ mod tests {
     use indoc::indoc;
 
     #[test]
-    fn returns_empty_apps_map_when_input_is_empty() {
+    fn load_returns_empty_apps_map_when_input_is_empty() {
         let spec = super::PlierSpec::load("");
 
         assert_eq!(spec.apps.len(), 0);
     }
 
     #[test]
-    fn returns_plier_spec_with_missing_versions_when_versions_are_missing() {
+    fn load_returns_spec_with_missing_versions_when_versions_are_missing() {
         let spec = super::PlierSpec::load(indoc!(
             r#"[apps.java]
                home_name = "java_home"
@@ -71,7 +71,7 @@ mod tests {
     }
 
     #[test]
-    fn returns_plier_spec_with_versions_when_they_exist() {
+    fn load_returns_spec_with_versions_when_they_exist() {
         let spec = super::PlierSpec::load(indoc!(
             r#"[apps.python]
                home_name = 'pythonhome'
