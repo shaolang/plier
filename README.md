@@ -15,6 +15,33 @@ of version managers for different languages.
 
 Non-goal: alias commands to do automatic switching,
 
+## Usage
+
+To add application for plier to manage:
+
+```
+$ plier add --app java --home-name JAVA_HOME --bin bin
+```
+
+Then to register an installation of the application:
+
+```
+$ plier add --app java --version 11 --home-path path/to/java/home
+```
+
+To use the application, specify the application followed by the version after
+the `use` subcommand:
+
+```
+$ plier use java 11
+```
+
+To see all the registered applications:
+
+```
+$ plier list
+```
+
 Copyright © 2020 Shaolang Ai
 
 Distributed under the Apache Software License 2.0
