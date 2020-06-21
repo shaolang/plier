@@ -47,6 +47,17 @@ impl PlierSpec {
             }
         }
     }
+
+    pub fn add_app(&mut self, app_name: &str, home_name: &str,
+                   bins: &[&str]) {
+        let app_spec = AppSpec {
+            home_name: home_name.to_string(),
+            bins: bins.iter().map(|s| s.to_string()).collect(),
+            versions: None,
+        };
+
+        self.apps.insert(app_name.to_string(), app_spec);
+    }
 }
 
 impl fmt::Display for PlierSpec {
@@ -60,6 +71,15 @@ mod tests {
     use indoc::indoc;
     use std::collections::HashMap;
     use std::path::PathBuf;
+
+    #[test]
+    fn add_app_with_no_versions() {
+        let mut spec = super::PlierSpec::load("");
+        spec.add_app("java", "java_home", &["bin"]);
+
+        assert_eq!(spec.apps.get("java").unwrap().home_name, "java_home");
+        assert_eq!(spec.apps.get("java").unwrap().bins, &["bin".to_string()]);
+    }
 
     #[test]
     fn load_returns_empty_apps_map_when_input_is_empty() {
