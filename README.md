@@ -1,4 +1,4 @@
-# plier
+# plier [![Build Status](https://travis-ci.org/shaolang/plier.svg?branch=master)](https://travis-ci.org/shaolang/plier)
 
 > ply: verb (used with object), plied, ply-ing
 >
