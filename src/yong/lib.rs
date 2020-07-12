@@ -58,16 +58,36 @@ impl YongSpec {
         self.apps.insert(app_name.to_string(), app_spec);
     }
 
-    pub fn add_version(&mut self, app_name: &str, version: &str, home_path: &str) {
+    pub fn add_version(&mut self, app_name: &str, ver: &str, home_path: &str) {
         let mut app = self.apps.get_mut(app_name).unwrap();
         let version = Version {
-            version: version.to_string(),
+            version: ver.to_string(),
             home_path: PathBuf::from(home_path),
         };
 
         if let Some(versions) = &mut app.versions {
-            versions.push(version);
-            app.versions = Some(versions.to_vec());
+            let mut new_vec = Vec::with_capacity(versions.len());
+            let mut is_upsert = false;
+            let version = Version {
+                version: ver.to_string(),
+                home_path: PathBuf::from(home_path),
+            };
+
+            for v in versions.iter() {
+                if &v.version != ver {
+                    new_vec.push(v.clone());
+                } else {
+                    is_upsert = true;
+
+                    new_vec.push(version.clone());
+                }
+            }
+
+            if !is_upsert {
+                new_vec.push(version.clone());
+            }
+
+            app.versions = Some(new_vec.to_vec());
         } else {
             app.versions = Some(vec![version]);
         }
@@ -204,6 +224,28 @@ mod tests {
                    [[apps.java.versions]]
                    version = "14"
                    home_path = "/path/to/java/14"
+                   "#
+            )
+        )
+    }
+
+    #[test]
+    fn add_duplicate_version_overrides_previous_setup() {
+        let mut spec = super::YongSpec::load("");
+        spec.add_app("node", "node_home", &["."]);
+        spec.add_version("node", "12.18.2", "/path/to/node/12.18.2");
+        spec.add_version("node", "12.18.2", "/alt/path/to/node/12.18.2");
+
+        assert_eq!(
+            format!("{}", spec),
+            indoc!(
+                r#"[apps.node]
+                   home_name = "node_home"
+                   bins = ["."]
+
+                   [[apps.node.versions]]
+                   version = "12.18.2"
+                   home_path = "/alt/path/to/node/12.18.2"
                    "#
             )
         )
