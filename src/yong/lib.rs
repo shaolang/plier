@@ -182,7 +182,7 @@ mod tests {
     }
 
     #[test]
-    fn add_version_to_existing_app_that_has_no_existing_versions() {
+    fn upsert_version_to_existing_app_that_has_no_existing_versions() {
         let mut spec = super::YongSpec::load("");
         spec.add_app("java", "java_home", &["bin"]);
         spec.upsert_version("java", "11", "/path/to/java/11");
@@ -203,7 +203,7 @@ mod tests {
     }
 
     #[test]
-    fn add_version_to_existing_app_that_has_existing_versions() {
+    fn upsert_version_to_existing_app_that_has_existing_versions() {
         let mut spec = super::YongSpec::load("");
         spec.add_app("java", "java_home", &["bin"]);
         spec.upsert_version("java", "11", "/path/to/java/11");
@@ -229,7 +229,7 @@ mod tests {
     }
 
     #[test]
-    fn add_duplicate_version_overrides_previous_setup() {
+    fn upsert_duplicate_version_overrides_previous_setup() {
         let mut spec = super::YongSpec::load("");
         spec.add_app("node", "node_home", &["."]);
         spec.upsert_version("node", "12.18.2", "/path/to/node/12.18.2");
