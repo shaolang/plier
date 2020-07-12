@@ -124,17 +124,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "06de47b848347d8c4c94219ad8ecd35eb90231704b067e67e6ae2e36ee023510"
 
 [[package]]
-name = "plier"
-version = "0.1.0"
-dependencies = [
- "clap",
- "indoc",
- "serde",
- "serde_derive",
- "toml",
-]
-
-[[package]]
 name = "proc-macro-error"
 version = "0.4.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -322,3 +311,14 @@ name = "winapi-x86_64-pc-windows-gnu"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
+
+[[package]]
+name = "yong"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "indoc",
+ "serde",
+ "serde_derive",
+ "toml",
+]

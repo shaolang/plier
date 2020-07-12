@@ -20,7 +20,7 @@ use std::path::PathBuf;
 use toml;
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct PlierSpec {
+pub struct YongSpec {
     apps: HashMap<String, AppSpec>,
 }
 
@@ -37,12 +37,12 @@ struct Version {
     home_path: PathBuf,
 }
 
-impl PlierSpec {
-    pub fn load(string: &str) -> PlierSpec {
-        if let Ok(spec) = toml::from_str::<PlierSpec>(string) {
+impl YongSpec {
+    pub fn load(string: &str) -> YongSpec {
+        if let Ok(spec) = toml::from_str::<YongSpec>(string) {
             spec
         } else {
-            PlierSpec {
+            YongSpec {
                 apps: HashMap::new(),
             }
         }
@@ -60,7 +60,7 @@ impl PlierSpec {
     }
 }
 
-impl fmt::Display for PlierSpec {
+impl fmt::Display for YongSpec {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", toml::to_string(&self).unwrap())
     }
@@ -74,7 +74,7 @@ mod tests {
 
     #[test]
     fn add_app_with_no_versions() {
-        let mut spec = super::PlierSpec::load("");
+        let mut spec = super::YongSpec::load("");
         spec.add_app("java", "java_home", &["bin"]);
 
         assert_eq!(spec.apps.get("java").unwrap().home_name, "java_home");
@@ -83,14 +83,14 @@ mod tests {
 
     #[test]
     fn load_returns_empty_apps_map_when_input_is_empty() {
-        let spec = super::PlierSpec::load("");
+        let spec = super::YongSpec::load("");
 
         assert_eq!(spec.apps.len(), 0);
     }
 
     #[test]
     fn load_returns_spec_with_missing_versions_when_versions_are_missing() {
-        let spec = super::PlierSpec::load(indoc!(
+        let spec = super::YongSpec::load(indoc!(
             r#"[apps.java]
                home_name = "java_home"
                bins = ["bin"]
@@ -102,7 +102,7 @@ mod tests {
 
     #[test]
     fn load_returns_spec_with_versions_when_they_exist() {
-        let spec = super::PlierSpec::load(indoc!(
+        let spec = super::YongSpec::load(indoc!(
             r#"[apps.python]
                home_name = 'pythonhome'
                bins = ['.', 'Scripts']
@@ -131,7 +131,7 @@ mod tests {
         let mut map: HashMap<String, super::AppSpec> = HashMap::new();
         map.insert("elixir".to_string(), app_spec);
 
-        let spec = super::PlierSpec { apps: map };
+        let spec = super::YongSpec { apps: map };
 
         assert_eq!(
             format!("{}", &spec),
