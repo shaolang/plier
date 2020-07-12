@@ -17,7 +17,6 @@ use serde_derive::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
 use std::path::PathBuf;
-use toml;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct YongSpec {
@@ -74,7 +73,7 @@ impl YongSpec {
             };
 
             for v in versions.iter() {
-                if &v.version != ver {
+                if v.version != ver {
                     new_versions.push(v.clone());
                 } else {
                     is_upsert = true;
@@ -84,7 +83,7 @@ impl YongSpec {
             }
 
             if !is_upsert {
-                new_versions.push(version.clone());
+                new_versions.push(version);
             }
 
             app.versions = Some(new_versions.to_vec());
