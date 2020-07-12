@@ -58,7 +58,10 @@ impl YongSpec {
     }
 
     pub fn upsert_version(&mut self, app_name: &str, ver: &str, home_path: &str) {
-        let mut app = self.apps.get_mut(app_name).unwrap();
+        let mut app = self
+            .apps
+            .get_mut(app_name)
+            .unwrap_or_else(|| panic!("Please add the application \"{}\" first.", app_name));
         let version = Version {
             version: ver.to_string(),
             home_path: PathBuf::from(home_path),
@@ -248,5 +251,12 @@ mod tests {
                    "#
             )
         )
+    }
+
+    #[test]
+    #[should_panic(expected = "Please add the application \"node\" first.")]
+    fn upsert_version_to_non_existent_app_panics() {
+        let mut spec = super::YongSpec::load("");
+        spec.upsert_version("node", "12.18.2", "/path/to/node");
     }
 }
