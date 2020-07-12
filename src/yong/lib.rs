@@ -58,7 +58,7 @@ impl YongSpec {
         self.apps.insert(app_name.to_string(), app_spec);
     }
 
-    pub fn add_version(&mut self, app_name: &str, ver: &str, home_path: &str) {
+    pub fn upsert_version(&mut self, app_name: &str, ver: &str, home_path: &str) {
         let mut app = self.apps.get_mut(app_name).unwrap();
         let version = Version {
             version: ver.to_string(),
@@ -66,7 +66,7 @@ impl YongSpec {
         };
 
         if let Some(versions) = &mut app.versions {
-            let mut new_vec = Vec::with_capacity(versions.len());
+            let mut new_versions = Vec::with_capacity(versions.len());
             let mut is_upsert = false;
             let version = Version {
                 version: ver.to_string(),
@@ -75,19 +75,19 @@ impl YongSpec {
 
             for v in versions.iter() {
                 if &v.version != ver {
-                    new_vec.push(v.clone());
+                    new_versions.push(v.clone());
                 } else {
                     is_upsert = true;
 
-                    new_vec.push(version.clone());
+                    new_versions.push(version.clone());
                 }
             }
 
             if !is_upsert {
-                new_vec.push(version.clone());
+                new_versions.push(version.clone());
             }
 
-            app.versions = Some(new_vec.to_vec());
+            app.versions = Some(new_versions.to_vec());
         } else {
             app.versions = Some(vec![version]);
         }
@@ -186,7 +186,7 @@ mod tests {
     fn add_version_to_existing_app_that_has_no_existing_versions() {
         let mut spec = super::YongSpec::load("");
         spec.add_app("java", "java_home", &["bin"]);
-        spec.add_version("java", "11", "/path/to/java/11");
+        spec.upsert_version("java", "11", "/path/to/java/11");
 
         assert_eq!(
             format!("{}", spec),
@@ -207,8 +207,8 @@ mod tests {
     fn add_version_to_existing_app_that_has_existing_versions() {
         let mut spec = super::YongSpec::load("");
         spec.add_app("java", "java_home", &["bin"]);
-        spec.add_version("java", "11", "/path/to/java/11");
-        spec.add_version("java", "14", "/path/to/java/14");
+        spec.upsert_version("java", "11", "/path/to/java/11");
+        spec.upsert_version("java", "14", "/path/to/java/14");
 
         assert_eq!(
             format!("{}", spec),
@@ -233,8 +233,8 @@ mod tests {
     fn add_duplicate_version_overrides_previous_setup() {
         let mut spec = super::YongSpec::load("");
         spec.add_app("node", "node_home", &["."]);
-        spec.add_version("node", "12.18.2", "/path/to/node/12.18.2");
-        spec.add_version("node", "12.18.2", "/alt/path/to/node/12.18.2");
+        spec.upsert_version("node", "12.18.2", "/path/to/node/12.18.2");
+        spec.upsert_version("node", "12.18.2", "/alt/path/to/node/12.18.2");
 
         assert_eq!(
             format!("{}", spec),
