@@ -31,7 +31,7 @@ struct AppSpec {
     versions: Option<Vec<Version>>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 struct Version {
     version: String,
     home_path: PathBuf,
@@ -48,8 +48,7 @@ impl YongSpec {
         }
     }
 
-    pub fn add_app(&mut self, app_name: &str, home_name: &str,
-                   bins: &[&str]) {
+    pub fn add_app(&mut self, app_name: &str, home_name: &str, bins: &[&str]) {
         let app_spec = AppSpec {
             home_name: home_name.to_string(),
             bins: bins.iter().map(|s| s.to_string()).collect(),
@@ -57,6 +56,21 @@ impl YongSpec {
         };
 
         self.apps.insert(app_name.to_string(), app_spec);
+    }
+
+    pub fn add_version(&mut self, app_name: &str, version: &str, home_path: &str) {
+        let mut app = self.apps.get_mut(app_name).unwrap();
+        let version = Version {
+            version: version.to_string(),
+            home_path: PathBuf::from(home_path),
+        };
+
+        if let Some(versions) = &mut app.versions {
+            versions.push(version);
+            app.versions = Some(versions.to_vec());
+        } else {
+            app.versions = Some(vec![version]);
+        }
     }
 }
 
@@ -143,6 +157,53 @@ mod tests {
                    [[apps.elixir.versions]]
                    version = "1.10.3"
                    home_path = "/path/to/elixir/1.10.3"
+                   "#
+            )
+        )
+    }
+
+    #[test]
+    fn add_version_to_existing_app_that_has_no_existing_versions() {
+        let mut spec = super::YongSpec::load("");
+        spec.add_app("java", "java_home", &["bin"]);
+        spec.add_version("java", "11", "/path/to/java/11");
+
+        assert_eq!(
+            format!("{}", spec),
+            indoc!(
+                r#"[apps.java]
+                   home_name = "java_home"
+                   bins = ["bin"]
+
+                   [[apps.java.versions]]
+                   version = "11"
+                   home_path = "/path/to/java/11"
+                   "#
+            )
+        )
+    }
+
+    #[test]
+    fn add_version_to_existing_app_that_has_existing_versions() {
+        let mut spec = super::YongSpec::load("");
+        spec.add_app("java", "java_home", &["bin"]);
+        spec.add_version("java", "11", "/path/to/java/11");
+        spec.add_version("java", "14", "/path/to/java/14");
+
+        assert_eq!(
+            format!("{}", spec),
+            indoc!(
+                r#"[apps.java]
+                   home_name = "java_home"
+                   bins = ["bin"]
+
+                   [[apps.java.versions]]
+                   version = "11"
+                   home_path = "/path/to/java/11"
+
+                   [[apps.java.versions]]
+                   version = "14"
+                   home_path = "/path/to/java/14"
                    "#
             )
         )
