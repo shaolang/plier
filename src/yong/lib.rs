@@ -48,13 +48,17 @@ impl YongSpec {
     }
 
     pub fn add_app(&mut self, app_name: &str, home_name: &str, bins: &[&str]) {
-        let app_spec = AppSpec {
-            home_name: home_name.to_string(),
-            bins: bins.iter().map(|s| s.to_string()).collect(),
-            versions: None,
-        };
+        let home_name = home_name.to_string();
+        let bins: Vec<String> = bins.iter().map(|s| s.to_string()).collect();
 
-        self.apps.insert(app_name.to_string(), app_spec);
+        if let Some(app) = &mut self.apps.get_mut(app_name) {
+            app.home_name = home_name;
+            app.bins = bins;
+        } else {
+            let app_spec = AppSpec { home_name, bins, versions: None, };
+
+            self.apps.insert(app_name.to_string(), app_spec);
+        }
     }
 
     pub fn upsert_version(&mut self, app_name: &str, ver: &str, home_path: &str) {
@@ -115,6 +119,33 @@ mod tests {
 
         assert_eq!(spec.apps.get("java").unwrap().home_name, "java_home");
         assert_eq!(spec.apps.get("java").unwrap().bins, &["bin".to_string()]);
+    }
+
+    #[test]
+    fn add_app_with_existing_versions_overrides_home_path_and_bins_only() {
+        let mut spec = super::YongSpec::load(indoc!(
+                r#"[apps.java]
+                   home_name = "java"
+                   bins = ["etc"]
+
+                   [[apps.java.versions]]
+                   version = "11"
+                   home_path = "/path/to/java/11"
+                   "#
+                   ));
+
+        spec.add_app("java", "java_home", &["bin"]);
+
+        let expected = indoc!(r#"[apps.java]
+                                 home_name = "java_home"
+                                 bins = ["bin"]
+
+                                 [[apps.java.versions]]
+                                 version = "11"
+                                 home_path = "/path/to/java/11"
+                                 "#);
+
+        assert_eq!(format!("{}", spec), expected);
     }
 
     #[test]
