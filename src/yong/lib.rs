@@ -55,7 +55,11 @@ impl YongSpec {
             app.home_name = home_name;
             app.bins = bins;
         } else {
-            let app_spec = AppSpec { home_name, bins, versions: None, };
+            let app_spec = AppSpec {
+                home_name,
+                bins,
+                versions: None,
+            };
 
             self.apps.insert(app_name.to_string(), app_spec);
         }
@@ -124,26 +128,28 @@ mod tests {
     #[test]
     fn upsert_app_with_existing_versions_overrides_home_path_and_bins_only() {
         let mut spec = super::YongSpec::load(indoc!(
-                r#"[apps.java]
-                   home_name = "java"
-                   bins = ["etc"]
+            r#"[apps.java]
+               home_name = "java"
+               bins = ["etc"]
 
-                   [[apps.java.versions]]
-                   version = "11"
-                   home_path = "/path/to/java/11"
-                   "#
-                   ));
+               [[apps.java.versions]]
+               version = "11"
+               home_path = "/path/to/java/11"
+               "#
+        ));
 
         spec.upsert_app("java", "java_home", &["bin"]);
 
-        let expected = indoc!(r#"[apps.java]
-                                 home_name = "java_home"
-                                 bins = ["bin"]
+        let expected = indoc!(
+            r#"[apps.java]
+               home_name = "java_home"
+               bins = ["bin"]
 
-                                 [[apps.java.versions]]
-                                 version = "11"
-                                 home_path = "/path/to/java/11"
-                                 "#);
+               [[apps.java.versions]]
+               version = "11"
+               home_path = "/path/to/java/11"
+               "#
+        );
 
         assert_eq!(format!("{}", spec), expected);
     }
