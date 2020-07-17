@@ -21,11 +21,10 @@ Then to register an installation of the application:
 $ yong add --app java --version 11 --home-path path/to/java/home
 ```
 
-To use the application, specify the application followed by the version after
-the `use` subcommand:
+To use the application, specify the application followed by the version:
 
 ```
-$ yong use java 11
+$ yong java 11
 ```
 
 To see all the registered applications:
